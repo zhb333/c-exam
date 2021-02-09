@@ -3,4 +3,4 @@ project(learn C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(learn main.c)
+add_executable(learn seq_list.c)

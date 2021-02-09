@@ -1,142 +1,344 @@
+//
+// Created by Administrator on 2021/2/9.
+//
 #include <stdio.h>
+#include <stdlib.h>
+typedef char DataType;
+
+typedef struct node {
+  DataType data;
+  struct node *next;
+} ListNode;
+
+typedef ListNode *LinkList;
+//ListNode *p;
+//LinkList head;
 
 /**
- * 百钱买百鸡
- * @param g 公鸡
- * @param m 母鸡
- * @param s 小鸡
- * @return 多少种情况
+ * 头插法建立单链表
+ * @return 头指针
  */
-int Chicken(int g[], int m[], int s[]) {
-  int a, b, c, k = 0;
-  for (a = 0; a <= 20; a++) {
-    for (b = 0; b <= 33; b++) {
-      c = 100 - a - b;
-      if ((5 * a + 3 * b + c / 3 == 100) && (c % 3 == 0)) {
-        g[k] = a;
-        m[k] = b;
-        s[k] = c;
-        k++;
-      }
-    }
+LinkList CreateListF() {
+  LinkList head;
+  ListNode *p;
+  char ch;
+  head = NULL;
+  ch = getchar();
+  while (ch != '\n') {
+    p = (ListNode *) malloc(sizeof(ListNode));
+    p->data = ch;
+    p->next = head;
+    head = p;
+    ch = getchar();
   }
-  return k;
+  return head;
 }
 
-#define ListSize 100
-typedef int DataType;
-typedef struct {
-  DataType data[ListSize];
-  int length;
-} SeqList;
+/**
+ * 尾插法建立单链表
+ * @return 头指针
+ */
+LinkList CreateListR() {
+  LinkList head, rear;
+  ListNode *p;
+  char ch;
+  head = NULL;
+  rear = NULL;
+  ch = getchar();
+  while (ch != '\n') {
+    p = (ListNode *) malloc(sizeof(ListNode));
+    p->data = ch;
+    if (head == NULL) {
+      head = p;
+    } else {
+      rear->next = p;
+    }
+    rear = p;
+    ch = getchar();
+  }
+  if (rear != NULL) {
+    rear->next = NULL;
+  }
+  return head;
+}
 
 /**
- * 顺序表插入操作
- * @param L 顺序表指针
- * @param i 插入的位置，从 1 开始
+ * 尾插法建立带头节点的单链表
+ * @return 头节点
+ */
+LinkList CreateListR1() {
+  LinkList head = (ListNode *) malloc(sizeof(ListNode));
+  ListNode *p, *r;
+  DataType ch;
+  r = head;
+  while ((ch = getchar()) != '\n') {
+    p = (ListNode *) malloc(sizeof(ListNode));
+    p->data = ch;
+    r->next = p;
+    r = p;
+  }
+  r->next = NULL;
+  return head;
+}
+
+/**
+ * 带头节点的单链表根据位置查找
+ * @param head 头指针
+ * @param i 查找的位置，从 1 开始
+ * @return 查找位置的指针 或 NULL
+ */
+ListNode *GetNode(LinkList head, int i) {
+  ListNode *p;
+  int j;
+  p = head->next;
+  j = 1;
+  while (p != NULL && j < i) {
+    p = p->next;
+    j++;
+  }
+  if (j == i) {
+    return p;
+  } else {
+    return NULL;
+  }
+}
+
+/**
+ * 带头节点的单链表按值查找
+ * @param head 头节点
+ * @param k 查找的值
+ * @return 查找到的位置指针 或 NULL
+ */
+ListNode *LocateNode(LinkList head, DataType k) {
+  ListNode *p = head->next;
+  while (p && p->data != k) {
+    p = p->next;
+  }
+  return p;
+}
+
+/**
+ * 带头节点的单链表插入操作
+ * @param head 头节点
+ * @param i 插入位置，从 1 开始；
  * @param x 插入的值
  */
-void InsertList(SeqList *L, int i, DataType x) {
+void InsertList(LinkList head, int i, DataType x) {
+  ListNode *p, *s;
   int j;
-  if (i < 1 || i > L->length + 1) {
-    printf("position error\n");
-    return;
+  p = head;
+  j = 0;
+  while (p != NULL && j < i - 1) {
+    p = p->next;
+    j++;
   }
 
-  if (L->length >= ListSize) {
-    printf("%d overflow\n", L->length);
+  if (p == NULL) {
+    printf("Error\n");
     return;
+  } else {
+    s = (ListNode *) malloc(sizeof(ListNode));
+    s->data = x;
+    s->next = p->next;
+    p->next = s;
   }
-  for (j = L->length - 1; j >= i - 1; j--) {
-    L->data[j + 1] = L->data[j];
-  }
-  L->data[i - 1] = x;
-  L->length++;
 }
 
 /**
- * 顺序表删除操作
- * @param L 顺序表指针
- * @param i 删除的位置，从 1 开始
+ * 删除带头节点的单链表
+ * @param head 头指针
+ * @param i 删除是位置，从 1 开始
+ * @return 删除节点的数据值
  */
-void DeleteList(SeqList *L, int i) {
-  int j;
-  if (i < 1 || i > L->length) {
-    printf("position error");
-    return;
-  }
-
-  for (j = i; j <= L->length - 1; j++) {
-    L->data[j - 1] = L->data[j];
-  }
-  L->length--;
-}
-
-/**
- * 顺序表元素调换
- * @param L 顺序表
- * @return 调换后的顺序表
- */
-SeqList ConVerts(SeqList L) {
+DataType DeleteList(LinkList head, int i) {
+  ListNode *p, *s;
   DataType x;
-  int i, k;
-  k = L.length / 2;
-  for (i = 0; i < k; i++) {
-    x = L.data[i];
-    L.data[i] = L.data[L.length - i - 1];
-    L.data[L.length - i - 1] = x;
+  int j;
+  p = head;
+  j = 0;
+  while (p != NULL && j < i - 1) {
+    p = p->next;
+    j++;
+  }
+  if (p == NULL) {
+    printf('位置错误\n');
+    exit(0);
+  } else {
+    s = p->next;
+    p->next = s->next;
+    x = s->data;
+    free(s);
+    return x;
+  }
+}
+
+/**
+ * 将不带头节点的单链表的开始节点连接到原单链表的尾部，原来第二个节点变成开始节点
+ * @param L 不带头节点的单链表
+ * @return 连接后的单链表头指针
+ */
+LinkList MyNote(LinkList L) {
+  ListNode *q, *p;
+  if (L && L->next) {
+    q = L;
+    L = L->next;
+    p = L;
+    while (p->next) {
+      p = p->next;
+    }
+    p->next = q;
+    q->next = NULL;
   }
   return L;
 }
 
 /**
- * 求最大值，最小值，以及最大值位置，最小值位置
- * @param L 顺序表
- * @param max 最大值指针
- * @param min 最小值指针
- * @param k 最大值位置指针
- * @param j 最小值位置指针
+ * 按序号奇偶分解单链表
+ * @param a 带头节点，待分解的单链表
+ * @param b 带头节点的空链表
  */
-void MaxMin(SeqList L, DataType *max, DataType *min, int *k, int *j) {
-  int i;
-  *max = *min = L.data[0];
-  *k = *j = 1;
-  for (i = 1; i < L.length; i++) {
-    if (L.data[i] > *max) {
-      *max = L.data[i];
-      *k = i + 1;
-    } else if (L.data[i] < *min) {
-      *min = L.data[i];
-      *j = i + 1;
+void split(LinkList a, LinkList b) {
+  ListNode *p, *r, *s;
+  p = a->next;
+  r = a;
+  s = b;
+  while (p != NULL) {
+    r->next = p;
+    r = p;
+    p = p->next;
+    if (p) {
+      s->next = p;
+      s = p;
+      p = p->next;
+    }
+    r->next = s->next = NULL;
+  }
+}
+
+/**
+ * 将两个递增有序的单链表，合并为另一个单链表
+ * @param La 带头节点的单链表
+ * @param Lb 带头节点的单链表
+ * @return 合并后的单链表
+ */
+LinkList MergeList(LinkList La, LinkList Lb) {
+  ListNode *pa, *pb, *pc;
+  LinkList Lc;
+  pa = La->next;
+  pb = Lb->next;
+  Lc = pc = La;
+  while (pa != NULL && pb != NULL) {
+    if (pa->data <= pb->data) {
+      pc->next = pa;
+      pc = pa;
+      pa = pa->next;
+    } else {
+      pc->next = pb;
+      pc = pb;
+      pb = pb->next;
     }
   }
+  pc->next = pa != NULL ? pa : pb;
+  free(Lb);
+  return Lc;
 }
 
-int main() {
-  int i;
-
-  int g[4], m[4], s[4], count;
-  count = Chicken(g, m, s);
-  for (i = 0; i < count; i++) {
-    printf("公鸡：%d 只, 母鸡 %d 只, 小鸡 %d 只\n", g[i], m[i], s[i]);
+/**
+ * 在从大到小的单链表中，执行插入操作，并使单链表保持递减有序
+ * @param L 带头节点的单链表
+ * @param x 待插入的值
+ */
+void InsertList(LinkList L, int x) {
+  ListNode *s, *p, *q;
+  s = (ListNode *) malloc(sizeof(ListNode));
+  s->data = x;
+  p = L;
+  q = p->next;
+  while (q->data > x && q != L) {
+    p = p->next;
+    q = p->next;
   }
-
-  SeqList L;
-  L.length = 0;
-  for (i = 0; i < 10; i++) {
-    InsertList(&L, i + 1, i + 1);
-  }
-
-  L = ConVerts(L);
-
-  for (i = 0; i < L.length; i++) {
-    printf("L.data[%d] = %d\n", i, L.data[i]);
-  }
-
-  DataType max, min;
-  int maxPos, minPos;
-  MaxMin(L, &max, &min, &maxPos, &minPos);
-  printf("max=%d, maxPos=%d, min=%d, minPos=%d", max, maxPos, min, minPos);
-  return 0;
+  p->next = s;
+  s->next = q;
 }
 
+/**
+ * 删除带头节点的单链表中重复的值
+ * @param head 头指针
+ */
+void UniqueList(LinkList head) {
+  ListNode *p, *q;
+  p = head->next;
+  while (p != head) {
+    q = p->next;
+    while (q != head && q->data == p->data) {
+      p->next = q->next;
+      free(q);
+      q = p->next;
+    }
+    p = p->next;
+  }
+}
+
+typedef struct dlnode {
+  DataType data;
+  struct dlnode *prior, *next;
+} DLNode;
+
+typedef DLNode *DLinkList;
+//DLinkList head;
+
+/**
+ * 删除带头节点的双向链表中指定节点
+ * @param p 待删除节点指针
+ * @return 删除节点的数据值
+ */
+DataType DLDelete(DLNode *p) {
+  p->prior->next = p->next;
+  p->next->prior = p->prior;
+  DataType x = p->data;
+  free(p);
+  return x;
+}
+
+/**
+ * 将值为 x 的新节点插入到带头节点的双向链表中指定节点 *p 之前
+ * @param p 指定节点
+ * @param x 待插入的值
+ */
+void DLInsertBefore(DLNode *p, DataType x) {
+  DLNode *s = (DLNode *) malloc(sizeof(DLNode));
+  s->data = x;
+  s->prior = p->prior;
+  s->next = p;
+  p->prior->next = s;
+  p->prior = s;
+}
+
+/**
+ * 将值为 x 的新节点插入到带头节点的双向链表中指定节点 *p 之后
+ * @param p 指定节点
+ * @param x 待插入的值
+ */
+void DLInsertBefore(DLNode *p, DataType x) {
+  DLNode *s = (DLNode *) malloc(sizeof(DLNode));
+  s->data = x;
+  s->prior = p;
+  s->next = p->next;
+  p->next->prior = s;
+  p->next = s;
+}
+
+/**
+ * 修复双向循环链表的前驱指针域
+ * @param head 头指针
+ */
+void trans(DLinkList head) {
+  DLNode *p;
+  p = head;
+  while (p->next != head) {
+    p->next->prior = p;
+    p=p->next;
+  }
+  head->prior = p;
+}
